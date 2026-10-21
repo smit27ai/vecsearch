@@ -48,4 +48,4 @@ def test_batch_matches_single():
 def test_memory_bytes():
     index = BruteForceIndex(dim=128)
     index.add(np.zeros((100, 128)))
-    assert index.memory_bytes() == 100 * 128 * 4
+    assert index.memory_bytes() == 100 * 128 * 4 + 100 * 4  # vectors + norms

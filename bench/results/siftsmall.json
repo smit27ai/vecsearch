@@ -6,12 +6,307 @@
   "results": [
     {
       "index": "brute",
-      "params": {},
+      "build": {},
+      "search": {},
       "k": 10,
       "recall": 1.0,
-      "qps": 232.3,
-      "build_s": 0.001,
-      "memory_bytes": 5120000
+      "qps": 6211.5,
+      "build_s": 0.0024,
+      "memory_bytes": 5160000
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 50
+      },
+      "search": {
+        "nprobe": 1
+      },
+      "k": 10,
+      "recall": 0.617,
+      "qps": 44310.5,
+      "build_s": 0.1886,
+      "memory_bytes": 5265600
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 50
+      },
+      "search": {
+        "nprobe": 2
+      },
+      "k": 10,
+      "recall": 0.814,
+      "qps": 37592.6,
+      "build_s": 0.1886,
+      "memory_bytes": 5265600
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 50
+      },
+      "search": {
+        "nprobe": 4
+      },
+      "k": 10,
+      "recall": 0.916,
+      "qps": 23902.3,
+      "build_s": 0.1886,
+      "memory_bytes": 5265600
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 50
+      },
+      "search": {
+        "nprobe": 8
+      },
+      "k": 10,
+      "recall": 0.985,
+      "qps": 10348.3,
+      "build_s": 0.1886,
+      "memory_bytes": 5265600
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 50
+      },
+      "search": {
+        "nprobe": 16
+      },
+      "k": 10,
+      "recall": 1.0,
+      "qps": 6880.3,
+      "build_s": 0.1886,
+      "memory_bytes": 5265600
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 50
+      },
+      "search": {
+        "nprobe": 32
+      },
+      "k": 10,
+      "recall": 1.0,
+      "qps": 3759.4,
+      "build_s": 0.1886,
+      "memory_bytes": 5265600
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 50
+      },
+      "search": {
+        "nprobe": 64
+      },
+      "k": 10,
+      "recall": 1.0,
+      "qps": 2362.2,
+      "build_s": 0.1886,
+      "memory_bytes": 5265600
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 100
+      },
+      "search": {
+        "nprobe": 1
+      },
+      "k": 10,
+      "recall": 0.544,
+      "qps": 35662.1,
+      "build_s": 0.2293,
+      "memory_bytes": 5291200
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 100
+      },
+      "search": {
+        "nprobe": 2
+      },
+      "k": 10,
+      "recall": 0.723,
+      "qps": 39152.7,
+      "build_s": 0.2293,
+      "memory_bytes": 5291200
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 100
+      },
+      "search": {
+        "nprobe": 4
+      },
+      "k": 10,
+      "recall": 0.853,
+      "qps": 26461.3,
+      "build_s": 0.2293,
+      "memory_bytes": 5291200
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 100
+      },
+      "search": {
+        "nprobe": 8
+      },
+      "k": 10,
+      "recall": 0.951,
+      "qps": 17970.7,
+      "build_s": 0.2293,
+      "memory_bytes": 5291200
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 100
+      },
+      "search": {
+        "nprobe": 16
+      },
+      "k": 10,
+      "recall": 0.995,
+      "qps": 8704.4,
+      "build_s": 0.2293,
+      "memory_bytes": 5291200
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 100
+      },
+      "search": {
+        "nprobe": 32
+      },
+      "k": 10,
+      "recall": 1.0,
+      "qps": 5193.8,
+      "build_s": 0.2293,
+      "memory_bytes": 5291200
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 100
+      },
+      "search": {
+        "nprobe": 64
+      },
+      "k": 10,
+      "recall": 1.0,
+      "qps": 2529.1,
+      "build_s": 0.2293,
+      "memory_bytes": 5291200
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 200
+      },
+      "search": {
+        "nprobe": 1
+      },
+      "k": 10,
+      "recall": 0.475,
+      "qps": 39454.0,
+      "build_s": 0.3386,
+      "memory_bytes": 5342400
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 200
+      },
+      "search": {
+        "nprobe": 2
+      },
+      "k": 10,
+      "recall": 0.649,
+      "qps": 26375.5,
+      "build_s": 0.3386,
+      "memory_bytes": 5342400
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 200
+      },
+      "search": {
+        "nprobe": 4
+      },
+      "k": 10,
+      "recall": 0.815,
+      "qps": 26438.2,
+      "build_s": 0.3386,
+      "memory_bytes": 5342400
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 200
+      },
+      "search": {
+        "nprobe": 8
+      },
+      "k": 10,
+      "recall": 0.919,
+      "qps": 15950.2,
+      "build_s": 0.3386,
+      "memory_bytes": 5342400
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 200
+      },
+      "search": {
+        "nprobe": 16
+      },
+      "k": 10,
+      "recall": 0.985,
+      "qps": 10113.4,
+      "build_s": 0.3386,
+      "memory_bytes": 5342400
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 200
+      },
+      "search": {
+        "nprobe": 32
+      },
+      "k": 10,
+      "recall": 1.0,
+      "qps": 5494.1,
+      "build_s": 0.3386,
+      "memory_bytes": 5342400
+    },
+    {
+      "index": "ivf",
+      "build": {
+        "nlist": 200
+      },
+      "search": {
+        "nprobe": 64
+      },
+      "k": 10,
+      "recall": 1.0,
+      "qps": 3127.5,
+      "build_s": 0.3386,
+      "memory_bytes": 5342400
     }
   ]
 }
