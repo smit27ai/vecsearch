@@ -1,0 +1,17 @@
+{
+  "dataset": "synthetic",
+  "machine": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+  "python": "3.14.7",
+  "numpy": "2.5.4",
+  "results": [
+    {
+      "index": "brute",
+      "params": {},
+      "k": 10,
+      "recall": 1.0,
+      "qps": 327.2,
+      "build_s": 0.0009,
+      "memory_bytes": 5120000
+    }
+  ]
+}
