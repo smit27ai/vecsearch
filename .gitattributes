@@ -1,0 +1,7 @@
+# Never convert line endings in binary files. rag/sample/dsa_notes.pdf is
+# pure ASCII, so git would otherwise treat it as text and, with
+# core.autocrlf=true, rewrite LF to CRLF on checkout, which shifts every
+# byte offset in the PDF's cross-reference table.
+*.pdf binary
+*.npz binary
+*.png binary
