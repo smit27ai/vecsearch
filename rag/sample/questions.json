@@ -1,0 +1,33 @@
+{
+  "about": "In-scope questions list a phrase that a correct retrieved passage must contain. Out-of-scope questions are not covered by the notes; the assistant should refuse them.",
+  "in_scope": [
+    {"q": "Why is appending to a dynamic array O(1) amortized?", "expect": "doubling the capacity"},
+    {"q": "How do you detect a cycle in a linked list?", "expect": "tortoise and hare"},
+    {"q": "What does LIFO mean?", "expect": "last-in, first-out"},
+    {"q": "How can a stack check if brackets are balanced?", "expect": "push every opening bracket"},
+    {"q": "What is a circular buffer?", "expect": "wrap around"},
+    {"q": "What is the difference between a queue and a priority queue?", "expect": "highest priority"},
+    {"q": "When should a hash table be resized?", "expect": "load factor exceeds 0.75"},
+    {"q": "What is open addressing in hashing?", "expect": "probing other buckets"},
+    {"q": "Why can a binary search tree become slow?", "expect": "degenerates into a linked list"},
+    {"q": "How do you delete a BST node that has two children?", "expect": "in-order successor"},
+    {"q": "How does an AVL tree stay balanced?", "expect": "rotations"},
+    {"q": "Why do databases use B-trees?", "expect": "few disk reads"},
+    {"q": "Where are the children of index i in an array heap?", "expect": "2i + 1"},
+    {"q": "How fast is building a heap from n elements?", "expect": "takes O(n) time"},
+    {"q": "When should I use an adjacency list instead of a matrix?", "expect": "sparse graphs"},
+    {"q": "Which traversal finds shortest paths in an unweighted graph?", "expect": "Breadth-first search"},
+    {"q": "Why does Dijkstra fail with negative weights?", "expect": "negative"},
+    {"q": "How does Kruskal's algorithm detect cycles?", "expect": "union-find"},
+    {"q": "What makes quicksort hit its worst case?", "expect": "pivot is always the smallest or largest"},
+    {"q": "What does it mean for a sort to be stable?", "expect": "keep their original relative order"},
+    {"q": "Why are tries good for autocomplete?", "expect": "prefix sit in one subtree"},
+    {"q": "Why is scanning an array faster than a linked list in practice?", "expect": "cache locality"}
+  ],
+  "out_of_scope": [
+    "Who won the 2022 FIFA World Cup?",
+    "How does a transformer's attention mechanism work?",
+    "What is the time complexity of the simplex algorithm?",
+    "Explain how TCP's three-way handshake works."
+  ]
+}

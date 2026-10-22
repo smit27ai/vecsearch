@@ -14,7 +14,7 @@ and memory.
 | 2 | k-means + IVF | done |
 | 3 | HNSW | done |
 | 4 | Product Quantization, IVF-PQ | done |
-| 5 | persistence, delete, filter, API | done (RAG chatbot integration next) |
+| 5 | persistence, delete, filter, API, RAG pipeline on top | done (LLM eval needs an HF token) |
 | 6 | comparison with FAISS / hnswlib | |
 
 ## Setup
@@ -70,6 +70,73 @@ store = VectorStore.load("data/store.npz")
   leaves the previous file intact (a test simulates this). The HNSW
   random-generator state is saved too, so adding items after a load builds
   exactly the same graph as adding them before the save.
+
+## RAG pipeline on top (`rag/`)
+
+A small retrieval-augmented question-answering pipeline that uses
+`VectorStore` where a typical RAG app uses FAISS:
+
+```
+PDF --pypdf--> pages --> 120-word chunks (30 overlap) --MiniLM--> VectorStore
+question --MiniLM--> top-4 chunks --> grounded prompt --> Gemma-2-9B-it --> answer
+answer + chunks --> LLM judge --> faithfulness 1-5
+```
+
+```bash
+pip install -r requirements-rag.txt
+python -m rag.compare                      # VectorStore vs FAISS on the same embeddings
+python -m rag.eval                         # retrieval metrics; + LLM metrics if HF_TOKEN is set
+python -m rag.pipeline rag/sample/dsa_notes.pdf   # ask questions interactively (needs HF_TOKEN)
+```
+
+- **Grounding:** the prompt allows only the numbered passages, asks for
+  citations like `[2]`, and gives one exact refusal sentence for questions
+  the passages do not answer.
+- **Judge:** `rag/judge.py` scores faithfulness (is every claim supported
+  by the passages?) on a 1-5 scale. Its parser accepts the ways LLMs break
+  JSON in practice: code fences, text around the JSON, single quotes,
+  trailing commas, scores as strings or floats, or a bare "score: 4".
+- **Sample data:** `rag/sample/dsa_notes.md` is a set of data-structures
+  notes written for this project, turned into a 6-page PDF by
+  `rag/make_pdf.py` (a small PDF writer with no dependencies), plus 22
+  in-scope questions, each with a phrase the right passage must contain,
+  and 4 out-of-scope questions. Any PDF and question file can be used
+  instead.
+
+### Results
+
+**VectorStore returns exactly what FAISS returns.** On the same MiniLM
+embeddings of the 25 sample chunks and all 26 questions:
+
+| index | identical top-4 to FAISS IndexFlatIP | largest score difference |
+|---|---|---|
+| VectorStore flat | 26 / 26 | 1.5e-07 |
+| VectorStore hnsw (graph forced on) | 26 / 26 | 1.5e-07 |
+
+Speed is not compared here: every search over 25 chunks takes well under a
+millisecond. The SIFT benchmarks above cover speed at scale.
+
+**Retrieval on the sample questions** (MiniLM, top 4): hit@1 = 0.818,
+hit@4 = 1.000, MRR = 0.902. Every question's answer passage is in the top
+4; for 4 of the 22 it is ranked 2nd or 3rd.
+
+**A similarity threshold cannot replace refusals.** Top-1 cosine scores
+overlap between question types: the weakest in-scope question scores
+0.289, while the strongest out-of-scope question ("simplex algorithm")
+scores 0.424. Any cut-off either refuses real questions or lets unrelated
+ones through, so refusing is left to the grounded prompt.
+
+**Small collections skip the graph, on purpose.** `VectorStore` scans
+exactly when fewer than `exact_below` (1,000) items qualify, which is
+faster than walking a graph for 25 chunks. The comparison sets
+`exact_below = 0` so that HNSW is actually tested; without that, the
+"hnsw" row would silently measure the exact scan.
+
+**Not yet run:** answer generation, refusal accuracy and faithfulness
+scores. They need a Hugging Face token (`HF_TOKEN`); `python -m rag.eval`
+runs them automatically when it is set.
+
+## Web API
 
 The web API (`vecsearch/api.py`) exposes the same operations over HTTP:
 `POST /items`, `GET /items/{id}`, `DELETE /items/{id}`, `POST /search`,
@@ -259,6 +326,15 @@ bench/run.py            the benchmark tool; each new index registers in INDEXES
 bench/plot.py           recall vs QPS, distance count, and memory charts
 bench/draw_graph.py     2D picture of HNSW layers and a search path
 bench/filtered.py       post-filter vs in-graph filter vs exact scan
+rag/pdf.py              PDF pages -> overlapping word chunks with page numbers
+rag/embed.py            all-MiniLM-L6-v2 embeddings (local, CPU)
+rag/pipeline.py         ingest into VectorStore, retrieve, grounded answer
+rag/llm.py              Hugging Face Inference API chat client (Gemma-2-9B-it)
+rag/judge.py            faithfulness judge prompt and robust JSON parsing
+rag/eval.py             retrieval metrics, refusals, faithfulness
+rag/compare.py          VectorStore vs FAISS on the same embeddings
+rag/make_pdf.py         dependency-free text -> PDF writer
+rag/sample/             sample notes (.md and .pdf) and question set
 docs/                   images used by this README
 tests/                  pytest
 ```

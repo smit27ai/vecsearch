@@ -1,0 +1,375 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R 7 0 R 9 0 R 11 0 R 13 0 R 15 0 R] /Count 6 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+4 0 obj
+<< /Length 2575 >>
+stream
+BT /F1 10 Tf 13 TL 50 800 Td
+(DATA STRUCTURES STUDY NOTES) Tj T*
+() Tj T*
+(These notes cover the core data structures from a first course. Each section explains what the) Tj T*
+(structure stores, which operations it supports, and how fast those operations are.) Tj T*
+() Tj T*
+(1. MEASURING COST WITH BIG-O) Tj T*
+() Tj T*
+(Big-O notation describes how the running time or memory of an algorithm grows as the input size) Tj T*
+(n grows. It ignores constant factors and keeps only the fastest-growing term, so 3n + 20 is) Tj T*
+(written O\(n\) and n^2 + n is written O\(n^2\).) Tj T*
+() Tj T*
+(Common classes, from fastest to slowest: O\(1\) constant time, O\(log n\) logarithmic time, O\(n\)) Tj T*
+(linear time, O\(n log n\) linearithmic time, O\(n^2\) quadratic time, and O\(2^n\) exponential time.) Tj T*
+() Tj T*
+(Amortized cost is the average cost per operation over a long sequence of operations. An) Tj T*
+(operation can be expensive once in a while and still have a low amortized cost if the expensive) Tj T*
+(cases are rare enough. Appending to a dynamic array is the standard example: most appends are) Tj T*
+(O\(1\), an occasional resize is O\(n\), and the amortized cost of an append is O\(1\).) Tj T*
+() Tj T*
+(2. ARRAYS AND DYNAMIC ARRAYS) Tj T*
+() Tj T*
+(An array stores elements in one contiguous block of memory. Because every element has the same) Tj T*
+(size, the address of element i is the start address plus i times the element size, so reading) Tj T*
+(or writing any index takes O\(1\) time. This is called random access.) Tj T*
+() Tj T*
+(Inserting or deleting in the middle of an array takes O\(n\) time, because every element after) Tj T*
+(that position must shift by one.) Tj T*
+() Tj T*
+(A dynamic array grows automatically. When it runs out of space it allocates a new block,) Tj T*
+(usually twice as large, and copies every element across. Doubling the capacity is what makes) Tj T*
+(the amortized cost of append O\(1\): after a resize to capacity 2c, the next c appends are cheap.) Tj T*
+(Growing by a fixed amount instead, such as 10 extra slots each time, makes the amortized append) Tj T*
+(cost O\(n\).) Tj T*
+() Tj T*
+(Arrays have excellent cache locality. Neighbouring elements sit next to each other in memory,) Tj T*
+(so the processor loads several of them at once, which makes scanning an array much faster in) Tj T*
+(practice than scanning a linked list of the same length.) Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 4 0 R >>
+endobj
+6 0 obj
+<< /Length 3033 >>
+stream
+BT /F1 10 Tf 13 TL 50 800 Td
+(3. LINKED LISTS) Tj T*
+() Tj T*
+(A singly linked list is a chain of nodes. Each node stores a value and a pointer to the next) Tj T*
+(node. The list keeps a pointer to the first node, called the head.) Tj T*
+() Tj T*
+(Inserting or deleting at the head takes O\(1\) time. Inserting after a node you already hold a) Tj T*
+(pointer to also takes O\(1\) time. Finding the element at position i takes O\(n\) time, because you) Tj T*
+(must follow i pointers from the head. There is no random access.) Tj T*
+() Tj T*
+(A doubly linked list also stores a pointer to the previous node in each node. This allows O\(1\)) Tj T*
+(deletion of a node when you hold a pointer to it, and traversal in both directions, at the cost) Tj T*
+(of one extra pointer per node.) Tj T*
+() Tj T*
+(A common trick for detecting a cycle in a linked list is Floyd's tortoise and hare algorithm:) Tj T*
+(one pointer moves one step at a time and another moves two steps at a time. If the list has a) Tj T*
+(cycle, the fast pointer eventually meets the slow pointer. It uses O\(1\) extra memory.) Tj T*
+() Tj T*
+(4. STACKS) Tj T*
+() Tj T*
+(A stack is a last-in, first-out \(LIFO\) collection: the most recently added element is the first) Tj T*
+(one removed. The two main operations are push, which adds an element to the top, and pop, which) Tj T*
+(removes the top element. Peek returns the top element without removing it. All three take O\(1\)) Tj T*
+(time.) Tj T*
+() Tj T*
+(A stack can be implemented with a dynamic array, pushing and popping at the end, or with a) Tj T*
+(linked list, pushing and popping at the head.) Tj T*
+() Tj T*
+(Uses of stacks include the function call stack, undo history in editors, checking balanced) Tj T*
+(parentheses, evaluating postfix expressions, and depth-first search. To check balanced) Tj T*
+(brackets, push every opening bracket; on a closing bracket, pop and check that it matches. The) Tj T*
+(string is balanced if every pop matches and the stack is empty at the end.) Tj T*
+() Tj T*
+(5. QUEUES AND DEQUES) Tj T*
+() Tj T*
+(A queue is a first-in, first-out \(FIFO\) collection: elements leave in the same order they) Tj T*
+(arrived. Enqueue adds an element at the back and dequeue removes the element at the front. Both) Tj T*
+(take O\(1\) time.) Tj T*
+() Tj T*
+(A circular buffer implements a queue with a fixed-size array and two indices, head and tail,) Tj T*
+(that wrap around to the start of the array when they reach the end. This avoids shifting) Tj T*
+(elements when the front element is removed.) Tj T*
+() Tj T*
+(A deque, or double-ended queue, allows adding and removing at both ends in O\(1\) time. Queues) Tj T*
+(are used for breadth-first search, task scheduling, and buffering data between a producer and a) Tj T*
+(consumer.) Tj T*
+() Tj T*
+(A priority queue is different: it always removes the element with the highest priority, not the) Tj T*
+(oldest one. It is usually implemented with a heap, covered in section 9.) Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 6 0 R >>
+endobj
+8 0 obj
+<< /Length 2628 >>
+stream
+BT /F1 10 Tf 13 TL 50 800 Td
+(6. HASH TABLES) Tj T*
+() Tj T*
+(A hash table stores key-value pairs and supports insert, lookup and delete in O\(1\) average) Tj T*
+(time. A hash function turns each key into an integer, and that integer modulo the table size) Tj T*
+(gives the bucket where the pair is stored.) Tj T*
+() Tj T*
+(A collision happens when two different keys map to the same bucket. Separate chaining handles) Tj T*
+(collisions by keeping a small list of entries in each bucket. Open addressing handles) Tj T*
+(collisions by probing other buckets in a fixed order until a free one is found; linear probing) Tj T*
+(checks the next bucket, then the one after, and so on.) Tj T*
+() Tj T*
+(The load factor is the number of stored entries divided by the number of buckets. As the load) Tj T*
+(factor grows, collisions become more frequent and operations slow down. In these notes, a table) Tj T*
+(is resized to twice as many buckets when the load factor exceeds 0.75, and every entry is) Tj T*
+(rehashed into the new table. With a bad hash function, or an attacker choosing keys, every key) Tj T*
+(can land in the same bucket and operations degrade to O\(n\) in the worst case.) Tj T*
+() Tj T*
+(Hash tables do not keep keys in sorted order. If you need the smallest key or keys in a range,) Tj T*
+(use a balanced binary search tree instead.) Tj T*
+() Tj T*
+(7. BINARY SEARCH TREES) Tj T*
+() Tj T*
+(A binary search tree \(BST\) is a binary tree where every node's key is greater than all keys in) Tj T*
+(its left subtree and smaller than all keys in its right subtree. This ordering property lets) Tj T*
+(search discard half of the remaining tree at each step when the tree is balanced.) Tj T*
+() Tj T*
+(Search, insert and delete take O\(h\) time, where h is the height of the tree. In a balanced tree) Tj T*
+(h is O\(log n\). If keys are inserted in sorted order, each new key becomes the right child of) Tj T*
+(the previous one, the tree degenerates into a linked list, and h becomes n, so operations take) Tj T*
+(O\(n\).) Tj T*
+() Tj T*
+(An in-order traversal of a BST visits left subtree, node, right subtree, and outputs the keys) Tj T*
+(in sorted order. Pre-order visits the node before its subtrees; post-order visits it after.) Tj T*
+() Tj T*
+(Deleting a node with two children replaces its key with its in-order successor, which is the) Tj T*
+(smallest key in its right subtree, and then deletes that successor node, which has at most one) Tj T*
+(child.) Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+ET
+endstream
+endobj
+9 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 8 0 R >>
+endobj
+10 0 obj
+<< /Length 3582 >>
+stream
+BT /F1 10 Tf 13 TL 50 800 Td
+(8. BALANCED TREES) Tj T*
+() Tj T*
+(An AVL tree is a self-balancing BST. For every node, the heights of its left and right subtrees) Tj T*
+(differ by at most one. After an insert or delete, the tree checks this balance factor on the) Tj T*
+(path back to the root and restores it with rotations. A single rotation fixes a left-left or) Tj T*
+(right-right imbalance; a double rotation fixes a left-right or right-left imbalance. Height) Tj T*
+(stays O\(log n\), so search, insert and delete are all O\(log n\) in the worst case.) Tj T*
+() Tj T*
+(A red-black tree is another self-balancing BST. It colours each node red or black and enforces) Tj T*
+(rules that keep the longest root-to-leaf path at most twice the length of the shortest one.) Tj T*
+(Red-black trees do fewer rotations than AVL trees on insert and delete, while AVL trees are) Tj T*
+(more strictly balanced and slightly faster to search.) Tj T*
+() Tj T*
+(A B-tree is a balanced tree whose nodes hold many keys and have many children. Because each) Tj T*
+(node is large, the tree is very shallow, which means few disk reads per lookup. Databases and) Tj T*
+(file systems use B-trees for their indexes.) Tj T*
+() Tj T*
+(9. HEAPS) Tj T*
+() Tj T*
+(A binary heap is a complete binary tree stored in an array. In a min-heap every parent is) Tj T*
+(smaller than or equal to its children, so the minimum is always at the root. For the node at) Tj T*
+(index i, its children are at indices 2i + 1 and 2i + 2, and its parent is at index \(i - 1\) / 2) Tj T*
+(rounded down.) Tj T*
+() Tj T*
+(Insert places the new element at the end of the array and sifts it up, swapping with its parent) Tj T*
+(while it is smaller. Extract-min removes the root, moves the last element to the root, and) Tj T*
+(sifts it down, swapping with the smaller child. Both take O\(log n\) time. Reading the minimum) Tj T*
+(takes O\(1\).) Tj T*
+() Tj T*
+(Building a heap from n unsorted elements by sifting down every non-leaf node from the bottom up) Tj T*
+(takes O\(n\) time, which is faster than n separate inserts at O\(n log n\).) Tj T*
+() Tj T*
+(Heapsort builds a max-heap and repeatedly moves the maximum to the end of the array. It runs in) Tj T*
+(O\(n log n\) time in every case and uses O\(1\) extra memory, but it is not stable.) Tj T*
+() Tj T*
+(10. GRAPHS) Tj T*
+() Tj T*
+(A graph is a set of vertices connected by edges. Edges can be directed or undirected, and) Tj T*
+(weighted or unweighted.) Tj T*
+() Tj T*
+(An adjacency matrix stores a V by V table where entry \(u, v\) says whether an edge exists.) Tj T*
+(Checking one edge takes O\(1\) time but the matrix uses O\(V^2\) memory, which wastes space for) Tj T*
+(sparse graphs. An adjacency list stores, for every vertex, a list of its neighbours. It uses) Tj T*
+(O\(V + E\) memory and is the usual choice for sparse graphs.) Tj T*
+() Tj T*
+(Breadth-first search \(BFS\) explores the graph level by level using a queue. In an unweighted) Tj T*
+(graph, BFS finds the shortest path, measured in number of edges, from the start vertex to every) Tj T*
+(other vertex. Depth-first search \(DFS\) goes as deep as possible along each branch before) Tj T*
+(backtracking, using a stack or recursion. DFS is used for cycle detection, topological sorting,) Tj T*
+(and finding connected components. Both BFS and DFS take O\(V + E\) time with an adjacency list.) Tj T*
+() Tj T*
+(A topological sort orders the vertices of a directed acyclic graph so that every edge goes from) Tj T*
+(an earlier vertex to a later one. It exists only if the graph has no cycles.) Tj T*
+() Tj T*
+ET
+endstream
+endobj
+11 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 10 0 R >>
+endobj
+12 0 obj
+<< /Length 2789 >>
+stream
+BT /F1 10 Tf 13 TL 50 800 Td
+(11. SHORTEST PATHS AND SPANNING TREES) Tj T*
+() Tj T*
+(Dijkstra's algorithm finds the shortest paths from one source vertex in a graph with) Tj T*
+(non-negative edge weights. It keeps a priority queue of vertices ordered by their current best) Tj T*
+(distance, repeatedly removes the closest unfinished vertex, and relaxes its outgoing edges.) Tj T*
+(With a binary heap it runs in O\(\(V + E\) log V\) time. Dijkstra's algorithm gives wrong answers) Tj T*
+(when some edge weights are negative.) Tj T*
+() Tj T*
+(The Bellman-Ford algorithm handles negative edge weights. It relaxes every edge V - 1 times,) Tj T*
+(which takes O\(V E\) time, and one more round of relaxation detects a negative cycle if any) Tj T*
+(distance still improves.) Tj T*
+() Tj T*
+(A minimum spanning tree connects all vertices of a weighted undirected graph with the smallest) Tj T*
+(total edge weight. Kruskal's algorithm sorts the edges by weight and adds each edge that does) Tj T*
+(not create a cycle, using a union-find structure to check for cycles. Prim's algorithm grows) Tj T*
+(the tree from one vertex, always adding the cheapest edge that reaches a new vertex.) Tj T*
+() Tj T*
+(12. SORTING) Tj T*
+() Tj T*
+(A sorting algorithm is stable if equal elements keep their original relative order. Stability) Tj T*
+(matters when sorting records by one field after they were already sorted by another.) Tj T*
+() Tj T*
+(Merge sort splits the array in half, sorts each half recursively, and merges the two sorted) Tj T*
+(halves. It takes O\(n log n\) time in every case, is stable, and needs O\(n\) extra memory for) Tj T*
+(merging.) Tj T*
+() Tj T*
+(Quicksort picks a pivot, partitions the array into elements smaller and larger than the pivot,) Tj T*
+(and sorts each part recursively. Its average time is O\(n log n\) but its worst case is O\(n^2\),) Tj T*
+(which happens when the pivot is always the smallest or largest element, for example when the) Tj T*
+(first element is chosen as pivot on an already sorted array. Choosing a random pivot makes the) Tj T*
+(worst case very unlikely. Quicksort sorts in place and is usually the fastest comparison sort) Tj T*
+(in practice, but it is not stable.) Tj T*
+() Tj T*
+(Insertion sort takes O\(n^2\) time in general but O\(n\) on nearly sorted input, and it is fast on) Tj T*
+(very small arrays, so practical sorting libraries switch to insertion sort for small subarrays.) Tj T*
+() Tj T*
+(No comparison-based sort can beat O\(n log n\) in the worst case. Counting sort and radix sort) Tj T*
+(avoid comparisons and can sort integers in linear time when the range of values is limited.) Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+() Tj T*
+ET
+endstream
+endobj
+13 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 12 0 R >>
+endobj
+14 0 obj
+<< /Length 873 >>
+stream
+BT /F1 10 Tf 13 TL 50 800 Td
+(13. TRIES AND UNION-FIND) Tj T*
+() Tj T*
+(A trie, or prefix tree, stores strings character by character. Each edge is labelled with a) Tj T*
+(character, and each path from the root spells a prefix. Looking up a word of length L takes) Tj T*
+(O\(L\) time, no matter how many words are stored. Tries are used for autocomplete and spell) Tj T*
+(checking because all words with a given prefix sit in one subtree.) Tj T*
+() Tj T*
+(A union-find structure, also called a disjoint-set structure, keeps track of which elements) Tj T*
+(belong to the same group. Find returns the representative of an element's group, and union) Tj T*
+(merges two groups. With union by rank and path compression, a sequence of operations runs in) Tj T*
+(nearly constant amortized time per operation. Kruskal's algorithm uses union-find to detect) Tj T*
+(cycles.) Tj T*
+ET
+endstream
+endobj
+15 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents 14 0 R >>
+endobj
+xref
+0 16
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000148 00000 n 
+0000000218 00000 n 
+0000002845 00000 n 
+0000002971 00000 n 
+0000006056 00000 n 
+0000006182 00000 n 
+0000008862 00000 n 
+0000008988 00000 n 
+0000012623 00000 n 
+0000012751 00000 n 
+0000015593 00000 n 
+0000015721 00000 n 
+0000016646 00000 n 
+trailer
+<< /Size 16 /Root 1 0 R >>
+startxref
+16774
+%%EOF

@@ -1,0 +1,155 @@
+{
+  "pdf": "dsa_notes.pdf",
+  "chunks": 25,
+  "k": 4,
+  "retrieval": {
+    "hit@1": 0.818,
+    "hit@4": 1.0,
+    "mrr": 0.902,
+    "misses": [],
+    "rows": [
+      {
+        "q": "Why is appending to a dynamic array O(1) amortized?",
+        "rank": 1,
+        "top_score": 0.7617,
+        "top_id": "dsa_notes_p1_c2"
+      },
+      {
+        "q": "How do you detect a cycle in a linked list?",
+        "rank": 1,
+        "top_score": 0.7039,
+        "top_id": "dsa_notes_p2_c1"
+      },
+      {
+        "q": "What does LIFO mean?",
+        "rank": 1,
+        "top_score": 0.2892,
+        "top_id": "dsa_notes_p2_c2"
+      },
+      {
+        "q": "How can a stack check if brackets are balanced?",
+        "rank": 1,
+        "top_score": 0.5776,
+        "top_id": "dsa_notes_p2_c2"
+      },
+      {
+        "q": "What is a circular buffer?",
+        "rank": 1,
+        "top_score": 0.442,
+        "top_id": "dsa_notes_p2_c3"
+      },
+      {
+        "q": "What is the difference between a queue and a priority queue?",
+        "rank": 1,
+        "top_score": 0.6484,
+        "top_id": "dsa_notes_p2_c4"
+      },
+      {
+        "q": "When should a hash table be resized?",
+        "rank": 1,
+        "top_score": 0.5456,
+        "top_id": "dsa_notes_p3_c1"
+      },
+      {
+        "q": "What is open addressing in hashing?",
+        "rank": 1,
+        "top_score": 0.6245,
+        "top_id": "dsa_notes_p3_c0"
+      },
+      {
+        "q": "Why can a binary search tree become slow?",
+        "rank": 3,
+        "top_score": 0.5358,
+        "top_id": "dsa_notes_p4_c1"
+      },
+      {
+        "q": "How do you delete a BST node that has two children?",
+        "rank": 1,
+        "top_score": 0.6016,
+        "top_id": "dsa_notes_p3_c3"
+      },
+      {
+        "q": "How does an AVL tree stay balanced?",
+        "rank": 1,
+        "top_score": 0.7395,
+        "top_id": "dsa_notes_p4_c0"
+      },
+      {
+        "q": "Why do databases use B-trees?",
+        "rank": 1,
+        "top_score": 0.7107,
+        "top_id": "dsa_notes_p4_c1"
+      },
+      {
+        "q": "Where are the children of index i in an array heap?",
+        "rank": 1,
+        "top_score": 0.5912,
+        "top_id": "dsa_notes_p4_c2"
+      },
+      {
+        "q": "How fast is building a heap from n elements?",
+        "rank": 2,
+        "top_score": 0.6048,
+        "top_id": "dsa_notes_p4_c2"
+      },
+      {
+        "q": "When should I use an adjacency list instead of a matrix?",
+        "rank": 1,
+        "top_score": 0.6231,
+        "top_id": "dsa_notes_p4_c4"
+      },
+      {
+        "q": "Which traversal finds shortest paths in an unweighted graph?",
+        "rank": 2,
+        "top_score": 0.5785,
+        "top_id": "dsa_notes_p5_c0"
+      },
+      {
+        "q": "Why does Dijkstra fail with negative weights?",
+        "rank": 1,
+        "top_score": 0.6002,
+        "top_id": "dsa_notes_p5_c0"
+      },
+      {
+        "q": "How does Kruskal's algorithm detect cycles?",
+        "rank": 1,
+        "top_score": 0.597,
+        "top_id": "dsa_notes_p6_c1"
+      },
+      {
+        "q": "What makes quicksort hit its worst case?",
+        "rank": 1,
+        "top_score": 0.7259,
+        "top_id": "dsa_notes_p5_c2"
+      },
+      {
+        "q": "What does it mean for a sort to be stable?",
+        "rank": 2,
+        "top_score": 0.4727,
+        "top_id": "dsa_notes_p5_c2"
+      },
+      {
+        "q": "Why are tries good for autocomplete?",
+        "rank": 1,
+        "top_score": 0.2957,
+        "top_id": "dsa_notes_p6_c0"
+      },
+      {
+        "q": "Why is scanning an array faster than a linked list in practice?",
+        "rank": 1,
+        "top_score": 0.5681,
+        "top_id": "dsa_notes_p1_c3"
+      }
+    ]
+  },
+  "score_gap": {
+    "in_scope_top1": {
+      "min": 0.2892,
+      "mean": 0.584
+    },
+    "out_of_scope_top1": {
+      "max": 0.424,
+      "mean": 0.215
+    }
+  }
+}

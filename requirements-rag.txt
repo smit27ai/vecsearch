@@ -1,0 +1,7 @@
+# Extra libraries for the RAG pipeline in rag/. The core engine and its
+# tests need only requirements.txt.
+-r requirements.txt
+pypdf>=5.0
+sentence-transformers>=3.0
+huggingface_hub>=0.25
+faiss-cpu>=1.8
