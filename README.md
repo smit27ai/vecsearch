@@ -14,7 +14,7 @@ and memory.
 | 2 | k-means + IVF | done |
 | 3 | HNSW | done |
 | 4 | Product Quantization, IVF-PQ | done |
-| 5 | persistence, delete, filter, API | next |
+| 5 | persistence, delete, filter, API | done (RAG chatbot integration next) |
 | 6 | comparison with FAISS / hnswlib | |
 
 ## Setup
@@ -34,7 +34,47 @@ python -m vecsearch.datasets download     # download SIFT10K (~5 MB) into data/
 python -m bench.run --dataset siftsmall   # benchmark on SIFT10K
 python -m bench.plot --dataset siftsmall  # draw the charts
 python -m bench.draw_graph                # draw a small 2D HNSW, layer by layer
+python -m bench.filtered                  # filtered search experiment on SIFT10K
+python -m vecsearch.api --path data/store.npz --dim 384   # start the web API
 ```
+
+## Using it as a database
+
+```python
+from vecsearch import VectorStore
+
+store = VectorStore(dim=384, index="hnsw")        # or index="flat" for exact
+store.add(
+    ["dsa_p12_c1", "dsa_p12_c2"],                 # your own string ids
+    embeddings,                                   # (2, 384) array
+    [{"chapter": 3, "page": 12}, {"chapter": 3, "page": 12}],
+)
+store.search(query_embedding, k=5, filter={"chapter": 3})
+# [{"id": "dsa_p12_c1", "score": 0.83, "distance": 0.34, "metadata": {...}}, ...]
+
+store.delete(["dsa_p12_c2"])
+store.save("data/store.npz")
+store = VectorStore.load("data/store.npz")
+```
+
+- **Cosine similarity:** vectors are normalized when added, so `score` is
+  cosine similarity, the measure sentence-transformers embeddings use.
+- **Upsert:** adding an existing id replaces it.
+- **Delete** marks an item as a tombstone. It is never returned, but its
+  vector stays in the graph, because other nodes may route through it.
+  `compact()` rebuilds the index without tombstones.
+- **Filters:** `{"chapter": 3}` means equals; `{"chapter": [3, 4]}` means
+  one of.
+- **Save** writes one `.npz` file with a format version. It writes to a
+  temporary file and renames it over the old one, so a crash mid-save
+  leaves the previous file intact (a test simulates this). The HNSW
+  random-generator state is saved too, so adding items after a load builds
+  exactly the same graph as adding them before the save.
+
+The web API (`vecsearch/api.py`) exposes the same operations over HTTP:
+`POST /items`, `GET /items/{id}`, `DELETE /items/{id}`, `POST /search`,
+`POST /compact`, `POST /save`, `GET /stats`. Once the server is running,
+`http://127.0.0.1:8000/docs` gives an interactive page for each endpoint.
 
 Results are written to `bench/results/<dataset>.json` and the charts to
 `bench/results/<dataset>.png`. A full SIFT10K run takes about 5 minutes,
@@ -174,6 +214,34 @@ same run. Its benefit in this project is memory, not speed.
 gets 0.100 recall and IVF-PQ m=8 never passes 0.099. Like IVF, PQ relies
 on structure in the data.
 
+### Filtered search
+
+Three ways to answer "the top 10 among items matching a filter", on
+SIFT10K with HNSW M=16, ef_search=40, and a random fraction of items
+matching (`bench/filtered.py`):
+
+| matching | post-filter: results returned | in-graph: results | in-graph: distances | exact scan: distances |
+|---|---|---|---|---|
+| 50% (4,990) | 4.8 of 10 | 10, recall 0.998 | 767 | 4,990 |
+| 10% (1,001) | 1.1 of 10 | 10, recall 1.000 | 2,050 | 1,001 |
+| 1% (99) | 0.09 of 10 | 10, recall 1.000 | 5,384 | 99 |
+| 0.2% (16) | 0.03 of 10 | 10, recall 1.000 | 10,040 | 16 |
+
+**Searching first and filtering after does not work.** It finds the top 10
+overall and then throws most of them away; with a 1% filter it returns
+almost nothing.
+
+**Filtering inside the graph always returns k results, but gets expensive
+as the filter gets rarer.** It must walk through non-matching nodes to
+reach matching ones. At 0.2% it visits the whole graph.
+
+**For rare filters, an exact scan of just the matching items is cheapest
+and never misses.** So `VectorStore` switches to an exact scan when fewer
+than `exact_below` items match (default 1,000). On SIFT10K the exact scan
+still wins at 1,001 matches (1,001 vs 2,050 distances), so the best
+switch-over point here is somewhere between 1,000 and 5,000 matches.
+Production databases such as Qdrant use the same idea.
+
 ## Layout
 
 ```
@@ -184,9 +252,13 @@ vecsearch/ivf.py        IVF index: search only the nprobe nearest clusters
 vecsearch/hnsw.py       HNSW graph index (Malkov & Yashunin, Algorithms 1-5)
 vecsearch/pq.py         Product Quantization codec, flat PQ index (with optional
                         re-ranking), and IVF-PQ (PQ on residuals)
+vecsearch/store.py      VectorStore: string ids, metadata, filters, delete,
+                        compact, cosine scores, atomic save/load
+vecsearch/api.py        FastAPI web server for a VectorStore
 bench/run.py            the benchmark tool; each new index registers in INDEXES
 bench/plot.py           recall vs QPS, distance count, and memory charts
 bench/draw_graph.py     2D picture of HNSW layers and a search path
+bench/filtered.py       post-filter vs in-graph filter vs exact scan
 docs/                   images used by this README
 tests/                  pytest
 ```

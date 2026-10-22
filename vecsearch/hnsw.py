@@ -92,6 +92,39 @@ class HNSWIndex:
                         heapq.heappop(results)  # drop the worst
         return sorted((-d, i) for d, i in results)
 
+    def _search_layer0_filtered(self, q, qq, entry_points, ef, allowed):
+        """Algorithm 2 on layer 0, returning only nodes where allowed[i] is True.
+
+        Filtered-out nodes are still walked through: they are the roads to
+        other nodes. Only allowed nodes enter `results`, and the search does
+        not stop until it has ef allowed results (or runs out of graph).
+        So a rare filter costs more steps but still returns k results,
+        which plain "search, then drop non-matching" cannot promise.
+        """
+        links = self.graph[0]
+        visited = {i for _, i in entry_points}
+        candidates = list(entry_points)
+        heapq.heapify(candidates)
+        results = [(-d, i) for d, i in entry_points if allowed[i]]
+        heapq.heapify(results)
+
+        while candidates:
+            d, c = heapq.heappop(candidates)
+            if len(results) >= ef and d > -results[0][0]:
+                break
+            fresh = [n for n in links[c] if n not in visited]
+            if not fresh:
+                continue
+            visited.update(fresh)
+            for dn, n in zip(self._dists(q, qq, fresh).tolist(), fresh):
+                if len(results) < ef or dn < -results[0][0]:
+                    heapq.heappush(candidates, (dn, n))
+                    if allowed[n]:
+                        heapq.heappush(results, (-dn, n))
+                        if len(results) > ef:
+                            heapq.heappop(results)
+        return sorted((-d, i) for d, i in results)
+
     # ---------- Algorithms 3 and 4: choose neighbours ----------
 
     def _select(self, candidates, m):
@@ -172,7 +205,8 @@ class HNSWIndex:
 
     # ---------- Algorithm 5: search ----------
 
-    def search(self, q, k):
+    def search(self, q, k, allowed=None):
+        """allowed: optional bool array, one per node; False nodes are never returned."""
         if self.entry is None:
             return np.empty(0, dtype=np.int64), np.empty(0, dtype=np.float32)
         q = np.asarray(q, dtype=np.float32)
@@ -180,7 +214,11 @@ class HNSWIndex:
         ep = [(float(self._dists(q, qq, [self.entry])[0]), self.entry)]
         for layer in range(self.max_level, 0, -1):  # highways: ef = 1
             ep = self._search_layer(q, qq, ep, 1, layer)[:1]
-        found = self._search_layer(q, qq, ep, max(self.ef_search, k), 0)[:k]
+        ef = max(self.ef_search, k)
+        if allowed is None:
+            found = self._search_layer(q, qq, ep, ef, 0)[:k]
+        else:
+            found = self._search_layer0_filtered(q, qq, ep, ef, allowed)[:k]
         return (np.array([i for _, i in found], dtype=np.int64),
                 np.array([d for d, _ in found], dtype=np.float32))
 
@@ -201,3 +239,57 @@ class HNSWIndex:
         # lists of ints actually use several times more.
         links = sum(len(v) for g in self.graph for v in g.values())
         return self.data[:self.n].nbytes + self.norms[:self.n].nbytes + 4 * links
+
+    # ---------- save / load (used by VectorStore) ----------
+
+    def stored_vectors(self):
+        return self.data[:self.n]
+
+    def state(self):
+        """(settings, arrays) that fully describe the index.
+
+        Each layer is stored in CSR form, like a sparse matrix:
+            nodes[i]                       a node on this layer
+            links[offsets[i]:offsets[i+1]] its neighbour list, in order
+        The random generator's state is saved too, so adding vectors after
+        a load gives exactly the same graph as adding them before the save.
+        """
+        settings = {
+            "dim": self.dim, "M": self.M, "ef_construction": self.ef_construction,
+            "ef_search": self.ef_search, "heuristic": self.heuristic,
+            "entry": self.entry, "max_level": self.max_level,
+            "rng_state": [self.rng.getstate()[0], list(self.rng.getstate()[1]),
+                          self.rng.getstate()[2]],
+        }
+        arrays = {"vectors": self.data[:self.n], "levels": np.array(self.levels, dtype=np.int32)}
+        for layer, g in enumerate(self.graph):
+            nodes = np.fromiter(g.keys(), dtype=np.int64, count=len(g))
+            counts = np.fromiter((len(v) for v in g.values()), dtype=np.int64, count=len(g))
+            arrays[f"l{layer}_nodes"] = nodes
+            arrays[f"l{layer}_offsets"] = np.concatenate([[0], np.cumsum(counts)])
+            arrays[f"l{layer}_links"] = np.fromiter(
+                (n for v in g.values() for n in v), dtype=np.int64, count=int(counts.sum()))
+        settings["layers"] = len(self.graph)
+        return settings, arrays
+
+    @classmethod
+    def from_state(cls, settings, arrays):
+        index = cls(settings["dim"], M=settings["M"], ef_construction=settings["ef_construction"],
+                    ef_search=settings["ef_search"], heuristic=settings["heuristic"])
+        vectors = np.asarray(arrays["vectors"], dtype=np.float32)
+        index.n = len(vectors)
+        index.data = np.resize(index.data, (max(index.n, 1024), index.dim))
+        index.norms = np.resize(index.norms, max(index.n, 1024))
+        index.data[:index.n] = vectors
+        index.norms[:index.n] = (vectors**2).sum(1)
+        index.levels = arrays["levels"].tolist()
+        index.graph = []
+        for layer in range(settings["layers"]):
+            nodes = arrays[f"l{layer}_nodes"].tolist()
+            off = arrays[f"l{layer}_offsets"]
+            links = arrays[f"l{layer}_links"].tolist()
+            index.graph.append({n: links[off[i]:off[i + 1]] for i, n in enumerate(nodes)})
+        index.entry, index.max_level = settings["entry"], settings["max_level"]
+        s = settings["rng_state"]
+        index.rng.setstate((s[0], tuple(s[1]), s[2]))
+        return index

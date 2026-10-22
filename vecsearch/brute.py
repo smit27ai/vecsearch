@@ -22,13 +22,20 @@ class BruteForceIndex:
         self.vectors = np.vstack([self.vectors, x])
         self.norms = np.concatenate([self.norms, (x**2).sum(1)])
 
-    def search(self, q, k):
-        """Return (ids, squared L2 distances) of the k closest vectors, closest first."""
+    def search(self, q, k, allowed=None):
+        """Return (ids, squared L2 distances) of the k closest vectors, closest first.
+
+        allowed: optional bool array, one per stored vector; False rows are
+        never returned (used for metadata filters and deleted items).
+        """
         # ||v - q||^2 = ||v||^2 - 2 v.q + ||q||^2. The matrix-vector product
         # avoids building an (N, d) temporary like (vectors - q) ** 2 does.
         q = np.asarray(q, dtype=np.float32)
         d = self.norms - 2 * (self.vectors @ q) + q @ q
         self.ndis += len(d)
+        if allowed is not None:
+            d = np.where(allowed, d, np.inf)
+            k = min(k, int(allowed.sum()))
         k = min(k, len(d))
         if k < len(d):
             idx = np.argpartition(d, k)[:k]  # top k in O(N), unsorted
@@ -54,3 +61,18 @@ class BruteForceIndex:
 
     def memory_bytes(self):
         return self.vectors.nbytes + self.norms.nbytes
+
+    # ---------- save / load (used by VectorStore) ----------
+
+    def stored_vectors(self):
+        return self.vectors
+
+    def state(self):
+        """(settings, arrays) that fully describe the index."""
+        return {"dim": self.dim}, {"vectors": self.vectors}
+
+    @classmethod
+    def from_state(cls, settings, arrays):
+        index = cls(settings["dim"])
+        index.add(arrays["vectors"])
+        return index

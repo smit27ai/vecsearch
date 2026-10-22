@@ -1,0 +1,106 @@
+{
+  "dataset": "siftsmall",
+  "k": 10,
+  "hnsw": {
+    "M": 16,
+    "ef_search": 40
+  },
+  "results": [
+    {
+      "selectivity": 0.5,
+      "matching": 4990,
+      "method": "post-filter",
+      "returned": 4.82,
+      "recall": 0.482,
+      "dist_per_query": 480.4
+    },
+    {
+      "selectivity": 0.5,
+      "matching": 4990,
+      "method": "in-graph",
+      "returned": 10.0,
+      "recall": 0.998,
+      "dist_per_query": 766.6
+    },
+    {
+      "selectivity": 0.5,
+      "matching": 4990,
+      "method": "exact scan",
+      "returned": 10.0,
+      "recall": 1.0,
+      "dist_per_query": 4990.0
+    },
+    {
+      "selectivity": 0.1,
+      "matching": 1001,
+      "method": "post-filter",
+      "returned": 1.09,
+      "recall": 0.109,
+      "dist_per_query": 480.4
+    },
+    {
+      "selectivity": 0.1,
+      "matching": 1001,
+      "method": "in-graph",
+      "returned": 10.0,
+      "recall": 1.0,
+      "dist_per_query": 2050.2
+    },
+    {
+      "selectivity": 0.1,
+      "matching": 1001,
+      "method": "exact scan",
+      "returned": 10.0,
+      "recall": 1.0,
+      "dist_per_query": 1001.0
+    },
+    {
+      "selectivity": 0.01,
+      "matching": 99,
+      "method": "post-filter",
+      "returned": 0.09,
+      "recall": 0.009,
+      "dist_per_query": 480.4
+    },
+    {
+      "selectivity": 0.01,
+      "matching": 99,
+      "method": "in-graph",
+      "returned": 10.0,
+      "recall": 1.0,
+      "dist_per_query": 5384.0
+    },
+    {
+      "selectivity": 0.01,
+      "matching": 99,
+      "method": "exact scan",
+      "returned": 10.0,
+      "recall": 1.0,
+      "dist_per_query": 99.0
+    },
+    {
+      "selectivity": 0.002,
+      "matching": 16,
+      "method": "post-filter",
+      "returned": 0.03,
+      "recall": 0.003,
+      "dist_per_query": 480.4
+    },
+    {
+      "selectivity": 0.002,
+      "matching": 16,
+      "method": "in-graph",
+      "returned": 10.0,
+      "recall": 1.0,
+      "dist_per_query": 10039.5
+    },
+    {
+      "selectivity": 0.002,
+      "matching": 16,
+      "method": "exact scan",
+      "returned": 10.0,
+      "recall": 1.0,
+      "dist_per_query": 16.0
+    }
+  ]
+}
