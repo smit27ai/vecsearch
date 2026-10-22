@@ -2,6 +2,9 @@
 
     recall@k      how correct (1.0 = found every true neighbour)
     qps           queries per second, one query at a time (median of 3 runs)
+    dist_per_query  distance computations per query. Unlike qps it does not
+                  depend on Python overhead or the machine, so it compares the
+                  algorithms themselves (the HNSW paper reports this too)
     build_s       seconds to add all base vectors (includes training)
     memory_bytes  what the index reports it holds in RAM
 
@@ -23,11 +26,12 @@ from pathlib import Path
 
 import numpy as np
 
-from vecsearch import BruteForceIndex, IVFIndex
+from vecsearch import BruteForceIndex, HNSWIndex, IVFIndex
 from vecsearch import datasets
 
 RESULTS_DIR = Path(__file__).resolve().parent / "results"
 NPROBES = [1, 2, 4, 8, 16, 32, 64]
+EF_SEARCH = [10, 20, 40, 80, 160, 320]
 
 # name -> builds:  list of build settings (one index is built per setting)
 #         make:    (dim, **build_setting) -> index
@@ -43,6 +47,15 @@ INDEXES = {
         "make": lambda dim, nlist: IVFIndex(dim, nlist),
         "sweep": [{"nprobe": p} for p in NPROBES],
     },
+    "hnsw": {
+        "builds": [
+            {"M": 8, "heuristic": True},
+            {"M": 16, "heuristic": True},
+            {"M": 16, "heuristic": False},
+        ],
+        "make": lambda dim, **b: HNSWIndex(dim, ef_construction=200, **b),
+        "sweep": [{"ef_search": e} for e in EF_SEARCH],
+    },
 }
 
 
@@ -53,13 +66,15 @@ def recall_at_k(found, truth, k):
 def measure(index, queries, gt, k, repeats=3):
     for q in queries[:5]:  # warm-up, not timed
         index.search(q, k)
+    index.ndis = 0
     times = []
     for _ in range(repeats):
         t = time.perf_counter()
         results = [index.search(q, k)[0] for q in queries]
         times.append(time.perf_counter() - t)
     recall = float(np.mean([recall_at_k(r, g, k) for r, g in zip(results, gt)]))
-    return recall, len(queries) / statistics.median(times)
+    dist_per_query = index.ndis / (repeats * len(queries))
+    return recall, len(queries) / statistics.median(times), dist_per_query
 
 
 def run(name, index, base, queries, gt, k=10, build=None, sweep=({},)):
@@ -72,7 +87,7 @@ def run(name, index, base, queries, gt, k=10, build=None, sweep=({},)):
     for search in sweep:
         for key, value in search.items():
             setattr(index, key, value)
-        recall, qps = measure(index, queries, gt, k)
+        recall, qps, dist_per_query = measure(index, queries, gt, k)
         rows.append({
             "index": name,
             "build": build or {},
@@ -80,6 +95,7 @@ def run(name, index, base, queries, gt, k=10, build=None, sweep=({},)):
             "k": k,
             "recall": round(recall, 4),
             "qps": round(qps, 1),
+            "dist_per_query": round(dist_per_query, 1),
             "build_s": round(build_s, 4),
             "memory_bytes": int(index.memory_bytes()),
         })
@@ -111,6 +127,7 @@ def main():
                 print(
                     f"{name:6} {json.dumps(build):15} {json.dumps(row['search']):15} "
                     f"recall@{args.k}={row['recall']:.4f}  qps={row['qps']:>9.1f}  "
+                    f"dist/q={row['dist_per_query']:>8.0f}  "
                     f"build={row['build_s']:.3f}s  mem={row['memory_bytes'] / 1e6:.1f}MB"
                 )
                 rows.append(row)

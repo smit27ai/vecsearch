@@ -21,8 +21,9 @@ def test_every_vector_in_exactly_one_list():
 def test_probing_every_list_is_exact():
     index, queries, gt = built()
     index.nprobe = index.nlist
-    recall, _ = measure(index, queries, gt, 10, repeats=1)
+    recall, _, dist_per_query = measure(index, queries, gt, 10, repeats=1)
     assert recall == 1.0
+    assert dist_per_query == index.nlist + len(index)  # every center + every vector
 
 
 def test_recall_never_drops_when_nprobe_grows():

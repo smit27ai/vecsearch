@@ -29,6 +29,7 @@ class IVFIndex:
         self.list_vectors = [np.empty((0, dim), dtype=np.float32) for _ in range(nlist)]
         self.list_norms = [np.empty(0, dtype=np.float32) for _ in range(nlist)]  # ||v||^2
         self.n = 0
+        self.ndis = 0  # distance computations, counted by the benchmark
 
     def __len__(self):
         return self.n
@@ -56,6 +57,7 @@ class IVFIndex:
         nprobe = min(self.nprobe, self.nlist)
         probe = np.argpartition(cd, nprobe - 1)[:nprobe]  # nearest clusters
         ids = np.concatenate([self.list_ids[c] for c in probe])
+        self.ndis += self.nlist + len(ids)  # all centers, then the probed lists
         if len(ids) == 0:
             return ids, np.empty(0, dtype=np.float32)
         # ||v - q||^2 = ||v||^2 - 2 v.q + ||q||^2, one list at a time.

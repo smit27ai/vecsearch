@@ -12,6 +12,7 @@ class BruteForceIndex:
         self.dim = dim
         self.vectors = np.empty((0, dim), dtype=np.float32)
         self.norms = np.empty(0, dtype=np.float32)  # ||v||^2, computed once on add
+        self.ndis = 0  # distance computations, counted by the benchmark
 
     def __len__(self):
         return len(self.vectors)
@@ -27,6 +28,7 @@ class BruteForceIndex:
         # avoids building an (N, d) temporary like (vectors - q) ** 2 does.
         q = np.asarray(q, dtype=np.float32)
         d = self.norms - 2 * (self.vectors @ q) + q @ q
+        self.ndis += len(d)
         k = min(k, len(d))
         if k < len(d):
             idx = np.argpartition(d, k)[:k]  # top k in O(N), unsorted
