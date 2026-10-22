@@ -13,8 +13,8 @@ and memory.
 | 1 | brute force + benchmark tool | done |
 | 2 | k-means + IVF | done |
 | 3 | HNSW | done |
-| 4 | Product Quantization | next |
-| 5 | persistence, delete, filter, API | |
+| 4 | Product Quantization, IVF-PQ | done |
+| 5 | persistence, delete, filter, API | next |
 | 6 | comparison with FAISS / hnswlib | |
 
 ## Setup
@@ -37,26 +37,37 @@ python -m bench.draw_graph                # draw a small 2D HNSW, layer by layer
 ```
 
 Results are written to `bench/results/<dataset>.json` and the charts to
-`bench/results/<dataset>.png`. A full SIFT10K run takes about 3 minutes,
-mostly HNSW builds.
+`bench/results/<dataset>.png`. A full SIFT10K run takes about 5 minutes,
+mostly HNSW builds. Run one benchmark at a time: two at once compete for
+the CPU and both report lower speeds.
 
 ## Results so far (SIFT10K, k=10, one query at a time, single machine)
 
 ![benchmark charts on SIFT10K](bench/results/siftsmall.png)
 
-Left chart: speed of this Python code. Right chart: distance computations
-per query, which measures the algorithm itself, independent of language.
+Left: speed of this Python code. Middle: distance computations per query,
+which measures the algorithm itself, independent of language. Right: bytes
+of RAM per stored vector.
 
-| index | setting | recall@10 | distances / query | queries/sec |
-|---|---|---|---|---|
-| brute | | 1.000 | 10,000 | 5,567 |
-| IVF nlist=50 | nprobe=8 | 0.985 | 1,682 | 12,136 |
-| IVF nlist=100 | nprobe=16 | 0.995 | 1,785 | 8,577 |
-| HNSW M=16 | ef_search=20 | 0.980 | 300 | 3,689 |
-| HNSW M=16 | ef_search=40 | 0.996 | 480 | 2,137 |
+| index | setting | recall@10 | distances / query | bytes / vector | queries/sec |
+|---|---|---|---|---|---|
+| brute | | 1.000 | 10,000 | 516 | 5,900 |
+| IVF nlist=50 | nprobe=8 | 0.985 | 1,682 | 527 | 8,377 |
+| IVF nlist=100 | nprobe=16 | 0.995 | 1,785 | 529 | 6,171 |
+| HNSW M=16 | ef_search=20 | 0.980 | 300 | 585 | 1,491 |
+| HNSW M=16 | ef_search=40 | 0.996 | 480 | 585 | 973 |
+| PQ m=8 | | 0.602 | 10,256 | **21** | 1,954 |
+| PQ m=16 | | 0.747 | 10,256 | 29 | 1,406 |
+| PQ m=32 | | 0.815 | 10,256 | 45 | 691 |
+| PQ m=8 + re-rank | rerank=100 | 0.988 | 10,356 | 533 | 1,346 |
+| IVF-PQ nlist=100, m=8 | nprobe=8 | 0.644 | 3,007 | 34 | 1,089 |
+| IVF-PQ nlist=100, m=16 | nprobe=16 | 0.758 | 5,881 | 42 | 188 |
 
-Speeds vary by roughly ±20% between runs; recall and distance counts are
-deterministic.
+Recall, distance counts and memory are deterministic. Queries/sec are from
+one run with all indexes measured back to back on a laptop that was also
+running other apps; compare them within this table, not across runs.
+For PQ, one "distance" is one ADC table-lookup sum, which is much cheaper
+than a full 128-number distance.
 
 ## How HNSW searches
 
@@ -115,6 +126,54 @@ and the simple rule builds about 1.8x faster. The heuristic matters more
 for clustered data, where the simple rule tends to link only inside a
 cluster; that is worth testing on GloVe.
 
+### Product Quantization: memory saved vs recall lost
+
+**PQ m=8 stores SIFT10K in 24x less memory and loses 40% of recall@10.**
+516 bytes per vector become 21. Of those 21, only 8 are the code; the
+other 13 are the 128 KB of codebooks shared by 10,000 vectors. At 1M
+vectors the codebooks cost 0.1 bytes each, so the saving approaches 64x.
+More chunks buy recall back: m=16 gives 0.747 at 29 bytes, m=32 gives 0.815
+at 45 bytes. Recall@10 is strict: PQ usually finds vectors that are very
+close, but not exactly the true top 10 in the right order.
+
+**Re-ranking recovers almost all of it, but needs the original vectors.**
+Taking the top 100 by PQ distance and re-scoring them exactly lifts m=8
+from 0.602 to 0.988. But the originals must be stored, so memory goes
+back to 533 bytes. Real systems keep the codes in RAM and the originals on
+SSD, and read only those 100 per query; this project keeps both in RAM and
+counts both.
+
+**IVF-PQ hits a recall ceiling.** With m=8, recall stops at 0.644 from
+nprobe=8 onward: probing more lists no longer helps because the true
+neighbours are already in the probed lists, and PQ's rough distances
+rank them wrong. The limit is the code, not the search.
+
+**Encoding residuals beats encoding raw vectors.** With the same 8-byte
+code, IVF-PQ (which encodes vector minus cluster center) reaches 0.644
+while flat PQ reaches 0.602. Residuals are smaller and centered on zero,
+so 256 centers per chunk describe them more precisely. A test checks this.
+
+**At 10,000 vectors IVF-PQ is badly sized.** Every probed list needs its
+own distance table, which costs as much as 256 full distances, but each
+list holds only about 100 vectors. At nprobe=64 that is 22,229 distance
+equivalents per query, more than brute force. IVF-PQ is built for lists
+of thousands of vectors (millions in total), and FAISS adds a
+precomputed-table trick that removes most of the per-list table cost.
+
+**The ids cost as much as the codes.** In IVF-PQ m=8, each vector costs
+8 bytes of code and 8 bytes of int64 id (plus shared codebooks and
+centers). Compressing vectors makes the bookkeeping visible.
+
+**PQ in NumPy is slower than brute force.** Each ADC step is a gather
+(`table[j][codes[j]]`), which NumPy does far more slowly than the single
+BLAS matrix-vector product brute force uses. In C, ADC lookups are fast;
+here flat PQ manages 1,954 queries/sec against brute force's 5,900 in the
+same run. Its benefit in this project is memory, not speed.
+
+**Random data breaks PQ too.** On the synthetic Gaussian vectors, PQ m=8
+gets 0.100 recall and IVF-PQ m=8 never passes 0.099. Like IVF, PQ relies
+on structure in the data.
+
 ## Layout
 
 ```
@@ -123,8 +182,10 @@ vecsearch/brute.py      exact search (the reference every other index is checked
 vecsearch/kmeans.py     k-means clustering
 vecsearch/ivf.py        IVF index: search only the nprobe nearest clusters
 vecsearch/hnsw.py       HNSW graph index (Malkov & Yashunin, Algorithms 1-5)
+vecsearch/pq.py         Product Quantization codec, flat PQ index (with optional
+                        re-ranking), and IVF-PQ (PQ on residuals)
 bench/run.py            the benchmark tool; each new index registers in INDEXES
-bench/plot.py           recall vs QPS and recall vs distance-count charts
+bench/plot.py           recall vs QPS, distance count, and memory charts
 bench/draw_graph.py     2D picture of HNSW layers and a search path
 docs/                   images used by this README
 tests/                  pytest
